@@ -2,13 +2,12 @@
 # LOAD PACKAGES -----------------------------------------------------------
 
 pacman::p_load(
+  "feasts",
   "tidyverse", 
   "tsibble", 
   "fable", 
   "lubridate"
 )
-
-install.packages("feasts")
 
 # GET UPDATED DATA --------------------------------------------------------
 
@@ -28,17 +27,19 @@ dat_covid_clean <- dat_covid %>%
     date = as.Date(date),
     country = str_remove(country, "Mainland ")
   ) %>% 
-  
+  # Arrange by date
   arrange(
-    date
+    # ___
   ) %>% 
   
+  # Group by country, date, and status
   group_by(
-    country, date, status
+    # ___
   ) %>% 
   
+  # use summarize to calculate the sum of cases by the groups
   summarize(
-    cases = sum(cases)
+    # ____
   ) %>% 
   
   ungroup()
@@ -52,19 +53,24 @@ dat_covid_clean %>%
 dat_covid_ts <- dat_covid_clean %>% 
   filter(
     # keep some of the most infected countries + canada
-    country %in% c("Canada", "Spain", "France", "Italy", "US", "Germany", "Iran"), 
+    country %in% c(
+      #___
+    ), 
     # keep only confirmed cases
-    status == "confirmed", 
+    status == #___, 
     # keep only dates with 20 or more cases
-    cases >= 30
+    cases >= #___
   ) %>% 
   select(
     # drop the status column
-    -status
+    #___
   ) %>% 
   as_tsibble(index = date, key = country) %>% 
   fill_gaps() %>% 
   tidyr::fill(cases)
+
+# use the autoplot function on dat_covid_ts
+autoplot(# ___)
 
 
 # CHECK OUT THE DIFFERENCES -----------------------------------------------
@@ -92,18 +98,32 @@ dat_covid_ts_diff %>%
   geom_path() + 
   facet_wrap(~country)
 
+# Plot log_diff_2 over time, facetted by country
 dat_covid_ts_diff %>% 
-  ggplot(aes(date, log_diff_2, group = country, color = country)) + 
+  ggplot(
+    aes(
+      x = #___, 
+      y = #___
+    )
+  ) + 
   geom_path() + 
-  facet_wrap(~country)
+  facet_wrap(
+    #___
+  )
 
 # SEPARATE INTO TRAINING AND TEST DATA ------------------------------------
 
 dat_covid_ts_train <- dat_covid_ts %>% 
-  filter(date < Sys.Date() - 7)
+  filter(
+    # keep observations recorded more than a week ago
+    date < #___
+  )
 
 dat_covid_ts_test <- dat_covid_ts %>% 
-  filter(date >= Sys.Date() - 7)
+  filter(
+    # Keep observations recorded a week ago or sooner
+    date >= #___
+  )
 
 
 
@@ -111,11 +131,11 @@ dat_covid_ts_test <- dat_covid_ts %>%
 
 dat_covid_fit <- dat_covid_ts_train %>% 
   model(
-    # 
-    # var = VAR(cases),
+    # fit a var model to cases
+    var = VAR(#___),
     # test additional models by uncommenting the following lines
     # ets = ETS(box_cox(cases, 0)), 
-    var_log = VAR(log(cases + 1)), 
+    # var_log = VAR(log(cases + 1)), 
     # nnet = NNETAR(box_cox(cases, 0)),
     # arima = ARIMA(log(cases))
   )
@@ -125,6 +145,9 @@ dat_covid_fit %>%
 
 dat_covid_fc <- dat_covid_fit %>% 
   forecast(h = "1 week")
+
+dat_covid_fc %>% 
+  accuracy(dat_covid_ts)
 
 dat_covid_fc %>% 
   autoplot(dat_covid_ts) + 
@@ -138,17 +161,20 @@ dat_covid_fc %>%
 # Where will the cases be in a week?
 dat_covid_fc_final <- dat_covid_ts %>% 
   model(
-    var = VAR(cases)
+    # fit a var model to cases
+    # ___
   ) %>% 
   forecast(
-    h = "1 week"
+    # forecast a week ahead
+    # ___
   )
 
 
 dat_covid_fc_final %>% 
-  autoplot(dat_covid_ts)+ 
+  autoplot(
+    # ___
+  ) + 
   scale_x_date(limits = c(as.Date("2020-03-01"), NA)) + 
-  # scale_y_log10(labels = scales::comma) + 
   theme_minimal()
 
 dat_covid_fc_final %>% 
