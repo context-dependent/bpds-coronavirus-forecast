@@ -133,6 +133,7 @@ dat_covid_fit <- dat_covid_ts_train %>%
   model(
     # fit a var model to cases
     var = VAR(#___),
+    
     # test additional models by uncommenting the following lines
     # ets = ETS(box_cox(cases, 0)), 
     # var_log = VAR(log(cases + 1)), 

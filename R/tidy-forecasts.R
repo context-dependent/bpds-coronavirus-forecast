@@ -2,13 +2,12 @@
 # LOAD PACKAGES -----------------------------------------------------------
 
 pacman::p_load(
+  "feasts",
   "tidyverse", 
   "tsibble", 
   "fable", 
   "lubridate"
 )
-
-install.packages("feasts")
 
 # GET UPDATED DATA --------------------------------------------------------
 
